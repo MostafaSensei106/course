@@ -30,6 +30,8 @@ class SecurityConfig(
                     .requestMatchers(HttpMethod.GET, "${ApiRoutes.Courses.BASE}/**").permitAll()
                     // actuator + errors
                     .requestMatchers("/actuator/**", "/error").permitAll()
+                    // swagger / openapi docs
+                    .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html").permitAll()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
