@@ -4,6 +4,7 @@ import com.mostafasensei.course.core.delivery.ApiResponse
 import com.mostafasensei.course.core.delivery.Responser
 import com.mostafasensei.course.core.delivery.toCode
 import com.mostafasensei.course.core.delivery.toHttpStatus
+import com.mostafasensei.course.core.router.ApiRoutes
 import com.mostafasensei.course.core.security.CurrentUser
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.auth.domain.entity.UserRole
@@ -39,7 +40,7 @@ private fun toUserDto(u: com.mostafasensei.course.modules.auth.domain.entity.Use
 )
 
 @RestController
-@RequestMapping("/api/v1/auth")
+@RequestMapping(ApiRoutes.Auth.BASE)
 class AuthController(
     private val registerUserUseCase: RegisterUserUseCase,
     private val loginUseCase: LoginUseCase,
@@ -49,7 +50,7 @@ class AuthController(
     private val resetPasswordUseCase: ResetPasswordUseCase,
 ) {
 
-    @PostMapping("/register")
+    @PostMapping(ApiRoutes.Auth.REGISTER)
     suspend fun registerStudent(
         @Valid @RequestBody request: RegisterStudentRequestDto
     ): ResponseEntity<ApiResponse<UserResponseDto>> {
@@ -62,7 +63,7 @@ class AuthController(
         )
     }
 
-    @PostMapping("/register/instructor")
+    @PostMapping(ApiRoutes.Auth.REGISTER_INSTRUCTOR)
     suspend fun registerInstructor(
         @Valid @RequestBody request: RegisterInstructorRequestDto
     ): ResponseEntity<ApiResponse<UserResponseDto>> {
@@ -76,7 +77,7 @@ class AuthController(
         )
     }
 
-    @PostMapping("/login")
+    @PostMapping(ApiRoutes.Auth.LOGIN)
     suspend fun login(@Valid @RequestBody request: LoginRequestDto): ResponseEntity<ApiResponse<LoginResponseDto>> {
         val result = loginUseCase(LoginParms(request.email, request.password))
         return result.fold(
@@ -87,7 +88,7 @@ class AuthController(
         )
     }
 
-    @GetMapping("/me")
+    @GetMapping(ApiRoutes.Auth.ME)
     suspend fun me(): ResponseEntity<ApiResponse<UserResponseDto>> {
         val result = getProfileUseCase(CurrentUser.requireId())
         return result.fold(
@@ -96,7 +97,7 @@ class AuthController(
         )
     }
 
-    @PatchMapping("/me")
+    @PatchMapping(ApiRoutes.Auth.ME)
     suspend fun updateMe(@Valid @RequestBody req: UpdateProfileRequestDto): ResponseEntity<ApiResponse<UserResponseDto>> {
         val result = updateProfileUseCase(UpdateProfileParams(CurrentUser.requireId(), req.firstName, req.lastName))
         return result.fold(
@@ -105,7 +106,7 @@ class AuthController(
         )
     }
 
-    @PostMapping("/password/request-reset")
+    @PostMapping(ApiRoutes.Auth.PASSWORD_REQUEST_RESET)
     suspend fun requestReset(@Valid @RequestBody req: RequestPasswordResetDto): ResponseEntity<ApiResponse<Map<String, String>>> {
         val result = requestResetUseCase(req.email)
         return result.fold(
@@ -114,7 +115,7 @@ class AuthController(
         )
     }
 
-    @PostMapping("/password/reset")
+    @PostMapping(ApiRoutes.Auth.PASSWORD_RESET)
     suspend fun reset(@Valid @RequestBody req: ResetPasswordRequestDto): ResponseEntity<ApiResponse<Map<String, String>>> {
         val result = resetPasswordUseCase(ResetPasswordParams(req.token, req.newPassword))
         return result.fold(

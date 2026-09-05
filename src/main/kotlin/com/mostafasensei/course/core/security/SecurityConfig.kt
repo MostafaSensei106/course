@@ -1,5 +1,6 @@
 package com.mostafasensei.course.core.security
 
+import com.mostafasensei.course.core.router.ApiRoutes
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
@@ -23,10 +24,10 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     // public auth endpoints
-                    .requestMatchers("/api/v1/auth/**").permitAll()
+                    .requestMatchers("${ApiRoutes.Auth.BASE}/**").permitAll()
                     // public catalog reads
-                    .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
-                    .requestMatchers(HttpMethod.GET, "/api/v1/courses/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "${ApiRoutes.Categories.BASE}/**").permitAll()
+                    .requestMatchers(HttpMethod.GET, "${ApiRoutes.Courses.BASE}/**").permitAll()
                     // actuator + errors
                     .requestMatchers("/actuator/**", "/error").permitAll()
                     .anyRequest().authenticated()

@@ -4,6 +4,7 @@ import com.mostafasensei.course.core.delivery.ApiResponse
 import com.mostafasensei.course.core.delivery.Responser
 import com.mostafasensei.course.core.delivery.toCode
 import com.mostafasensei.course.core.delivery.toHttpStatus
+import com.mostafasensei.course.core.router.ApiRoutes
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.auth.handler.dto.CreatePrivilegedUserRequestDto
 import com.mostafasensei.course.modules.auth.handler.dto.UpdateUserStatusDto
@@ -36,7 +37,7 @@ private fun toDto(u: com.mostafasensei.course.modules.auth.domain.entity.User) =
 )
 
 @RestController
-@RequestMapping("/api/v1/admin/users")
+@RequestMapping(ApiRoutes.AdminUsers.BASE)
 @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','MIN_ADMIN')")
 class AdminUserController(
     private val registerUserUseCase: RegisterUserUseCase,
@@ -76,7 +77,7 @@ class AdminUserController(
         )
     }
 
-    @GetMapping("/{id}")
+    @GetMapping(ApiRoutes.AdminUsers.BY_ID)
     suspend fun getById(@PathVariable id: UUID): ResponseEntity<ApiResponse<UserResponseDto>> {
         val result = getUserByIdUseCase(id)
         return result.fold(
@@ -85,7 +86,7 @@ class AdminUserController(
         )
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(ApiRoutes.AdminUsers.BY_ID)
     suspend fun updateStatus(
         @PathVariable id: UUID,
         @RequestBody req: UpdateUserStatusDto
@@ -97,7 +98,7 @@ class AdminUserController(
         )
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(ApiRoutes.AdminUsers.BY_ID)
     @PreAuthorize("hasRole('SUPER_ADMIN')")
     suspend fun delete(@PathVariable id: UUID): ResponseEntity<ApiResponse<Map<String, String>>> {
         val result = deleteUserUseCase(id)
@@ -107,7 +108,7 @@ class AdminUserController(
         )
     }
 
-    @PostMapping("/{id}/deactivate")
+    @PostMapping(ApiRoutes.AdminUsers.DEACTIVATE)
     suspend fun deactivate(@PathVariable id: UUID): ResponseEntity<ApiResponse<UserResponseDto>> {
         val result = deactivateUserUseCase(id)
         return result.fold(

@@ -4,6 +4,7 @@ import com.mostafasensei.course.core.delivery.ApiResponse
 import com.mostafasensei.course.core.delivery.Responser
 import com.mostafasensei.course.core.delivery.toCode
 import com.mostafasensei.course.core.delivery.toHttpStatus
+import com.mostafasensei.course.core.router.ApiRoutes
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.course.handler.dto.*
 import com.mostafasensei.course.modules.course.handler.usecase.*
@@ -15,7 +16,7 @@ import java.util.UUID
 
 // ---------------- Public category reads ----------------
 @RestController
-@RequestMapping("/api/v1/categories")
+@RequestMapping(ApiRoutes.Categories.BASE)
 class CategoryController(
     private val listCategoriesUseCase: ListCategoriesUseCase,
     private val getBySlugUseCase: GetCategoryBySlugUseCase,
@@ -28,7 +29,7 @@ class CategoryController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("LIST_CATEGORIES_FAILED"), f.message) }
         )
 
-    @GetMapping("/{slugOrId}")
+    @GetMapping(ApiRoutes.Categories.BY_SLUG_OR_ID)
     suspend fun get(@PathVariable slugOrId: String): ResponseEntity<ApiResponse<CategoryResponse>> {
         val parsed = runCatching { UUID.fromString(slugOrId) }.getOrNull()
         val result = if (parsed != null) getByIdUseCase(parsed) else getBySlugUseCase(slugOrId)
@@ -41,7 +42,7 @@ class CategoryController(
 
 // ---------------- Admin category CRUD ----------------
 @RestController
-@RequestMapping("/api/v1/admin/categories")
+@RequestMapping(ApiRoutes.AdminCategories.BASE)
 @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','MIN_ADMIN')")
 class AdminCategoryController(
     private val createCategoryUseCase: CreateCategoryUseCase,
@@ -56,14 +57,14 @@ class AdminCategoryController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("CREATE_CATEGORY_FAILED"), f.message) }
         )
 
-    @PutMapping("/{id}")
+    @PutMapping(ApiRoutes.AdminCategories.BY_ID)
     suspend fun update(@PathVariable id: UUID, @RequestBody req: UpdateCategoryRequest): ResponseEntity<ApiResponse<CategoryResponse>> =
         updateCategoryUseCase(UpdateCategoryParams(id, req.name, req.description)).fold(
             onSuccess = { Responser.ok(it.toResponse()) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("UPDATE_CATEGORY_FAILED"), f.message) }
         )
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(ApiRoutes.AdminCategories.BY_ID)
     suspend fun delete(@PathVariable id: UUID): ResponseEntity<ApiResponse<Map<String, String>>> =
         deleteCategoryUseCase(id).fold(
             onSuccess = { Responser.ok(mapOf("message" to "Category deleted")) },

@@ -4,6 +4,7 @@ import com.mostafasensei.course.core.delivery.ApiResponse
 import com.mostafasensei.course.core.delivery.Responser
 import com.mostafasensei.course.core.delivery.toCode
 import com.mostafasensei.course.core.delivery.toHttpStatus
+import com.mostafasensei.course.core.router.ApiRoutes
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.course.data.repository.LessonRepository
 import com.mostafasensei.course.modules.course.data.repository.SectionRepository
@@ -16,7 +17,7 @@ import org.springframework.web.bind.annotation.*
 import java.util.UUID
 
 @RestController
-@RequestMapping("/api/v1/admin/courses/{courseId}/sections")
+@RequestMapping(ApiRoutes.AdminSections.BASE)
 @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','MIN_ADMIN','INSTRUCTOR')")
 class AdminSectionController(
     private val createSectionUseCase: CreateSectionUseCase,
@@ -43,14 +44,14 @@ class AdminSectionController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("CREATE_SECTION_FAILED"), f.message) }
         )
 
-    @PutMapping("/{sectionId}")
+    @PutMapping(ApiRoutes.AdminSections.BY_ID)
     suspend fun update(@PathVariable courseId: UUID, @PathVariable sectionId: UUID, @RequestBody req: UpdateSectionRequest): ResponseEntity<ApiResponse<SectionResponse>> =
         updateSectionUseCase(UpdateSectionParams(sectionId, req.title, req.orderIndex)).fold(
             onSuccess = { Responser.ok(it.toResponse()) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("UPDATE_SECTION_FAILED"), f.message) }
         )
 
-    @DeleteMapping("/{sectionId}")
+    @DeleteMapping(ApiRoutes.AdminSections.BY_ID)
     suspend fun delete(@PathVariable courseId: UUID, @PathVariable sectionId: UUID): ResponseEntity<ApiResponse<Map<String, String>>> =
         deleteSectionUseCase(sectionId).fold(
             onSuccess = { Responser.ok(mapOf("message" to "Section deleted")) },
@@ -59,7 +60,7 @@ class AdminSectionController(
 }
 
 @RestController
-@RequestMapping("/api/v1/admin/sections/{sectionId}/lessons")
+@RequestMapping(ApiRoutes.AdminLessons.BASE)
 @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','MIN_ADMIN','INSTRUCTOR')")
 class AdminLessonController(
     private val createLessonUseCase: CreateLessonUseCase,
@@ -81,14 +82,14 @@ class AdminLessonController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("CREATE_LESSON_FAILED"), f.message) }
         )
 
-    @PutMapping("/{lessonId}")
+    @PutMapping(ApiRoutes.AdminLessons.BY_ID)
     suspend fun update(@PathVariable sectionId: UUID, @PathVariable lessonId: UUID, @RequestBody req: UpdateLessonRequest): ResponseEntity<ApiResponse<LessonResponse>> =
         updateLessonUseCase(UpdateLessonParams(lessonId, req.title, req.contentType, req.contentUrl, req.textContent, req.durationSeconds, req.orderIndex, req.isPreview)).fold(
             onSuccess = { Responser.ok(it.toResponse()) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("UPDATE_LESSON_FAILED"), f.message) }
         )
 
-    @DeleteMapping("/{lessonId}")
+    @DeleteMapping(ApiRoutes.AdminLessons.BY_ID)
     suspend fun delete(@PathVariable sectionId: UUID, @PathVariable lessonId: UUID): ResponseEntity<ApiResponse<Map<String, String>>> =
         deleteLessonUseCase(lessonId).fold(
             onSuccess = { Responser.ok(mapOf("message" to "Lesson deleted")) },

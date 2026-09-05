@@ -4,6 +4,7 @@ import com.mostafasensei.course.core.delivery.ApiResponse
 import com.mostafasensei.course.core.delivery.Responser
 import com.mostafasensei.course.core.delivery.toCode
 import com.mostafasensei.course.core.delivery.toHttpStatus
+import com.mostafasensei.course.core.router.ApiRoutes
 import com.mostafasensei.course.core.security.CurrentUser
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.course.domain.entity.CourseStatus
@@ -17,7 +18,7 @@ import java.util.UUID
 
 // ---------------- Public course fetches ----------------
 @RestController
-@RequestMapping("/api/v1/courses")
+@RequestMapping(ApiRoutes.Courses.BASE)
 class CourseController(
     private val listPublishedUseCase: ListPublishedCoursesUseCase,
     private val getDetailsUseCase: GetCourseDetailsUseCase,
@@ -35,7 +36,7 @@ class CourseController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("LIST_COURSES_FAILED"), f.message) }
         )
 
-    @GetMapping("/{slugOrId}")
+    @GetMapping(ApiRoutes.Courses.BY_SLUG_OR_ID)
     suspend fun details(@PathVariable slugOrId: String): ResponseEntity<ApiResponse<CourseDetailsResponse>> {
         val id = runCatching { UUID.fromString(slugOrId) }.getOrNull()
         if (id != null) return detailsById(id)
@@ -45,7 +46,7 @@ class CourseController(
         )
     }
 
-    @GetMapping("/id/{id}")
+    @GetMapping(ApiRoutes.Courses.BY_ID)
     suspend fun detailsById(@PathVariable id: UUID): ResponseEntity<ApiResponse<CourseDetailsResponse>> =
         getDetailsUseCase(id).fold(
             onSuccess = { d ->
@@ -64,7 +65,7 @@ class CourseController(
 
 // ---------------- Admin / Instructor course CRUD ----------------
 @RestController
-@RequestMapping("/api/v1/admin/courses")
+@RequestMapping(ApiRoutes.AdminCourses.BASE)
 @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN','MIN_ADMIN','INSTRUCTOR')")
 class AdminCourseController(
     private val createCourseUseCase: CreateCourseUseCase,
@@ -92,7 +93,7 @@ class AdminCourseController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("LIST_COURSES_FAILED"), f.message) }
         )
 
-    @GetMapping("/{id}")
+    @GetMapping(ApiRoutes.AdminCourses.BY_ID)
     suspend fun get(@PathVariable id: UUID): ResponseEntity<ApiResponse<CourseDetailsResponse>> =
         getDetailsUseCase(id).fold(
             onSuccess = { d ->
@@ -106,21 +107,21 @@ class AdminCourseController(
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("GET_COURSE_FAILED"), f.message) }
         )
 
-    @PutMapping("/{id}")
+    @PutMapping(ApiRoutes.AdminCourses.BY_ID)
     suspend fun update(@PathVariable id: UUID, @RequestBody req: UpdateCourseRequest): ResponseEntity<ApiResponse<CourseResponse>> =
         updateCourseUseCase(UpdateCourseParams(id, req.title, req.description, req.price, req.thumbnailUrl, req.categoryId, req.status)).fold(
             onSuccess = { Responser.ok(it.toResponse()) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("UPDATE_COURSE_FAILED"), f.message) }
         )
 
-    @PostMapping("/{id}/publish")
+    @PostMapping(ApiRoutes.AdminCourses.PUBLISH)
     suspend fun publish(@PathVariable id: UUID): ResponseEntity<ApiResponse<CourseResponse>> =
         publishCourseUseCase(id).fold(
             onSuccess = { Responser.ok(it.toResponse()) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("PUBLISH_COURSE_FAILED"), f.message) }
         )
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(ApiRoutes.AdminCourses.BY_ID)
     @PreAuthorize("hasAnyRole('SUPER_ADMIN','ADMIN')")
     suspend fun delete(@PathVariable id: UUID): ResponseEntity<ApiResponse<Map<String, String>>> =
         deleteCourseUseCase(id).fold(
