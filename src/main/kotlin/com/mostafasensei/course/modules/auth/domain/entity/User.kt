@@ -1,4 +1,4 @@
-package com.mostafasensei.course.modules.auth.data.models
+package com.mostafasensei.course.modules.auth.domain.entity
 
 import java.util.*
 import kotlin.time.Instant

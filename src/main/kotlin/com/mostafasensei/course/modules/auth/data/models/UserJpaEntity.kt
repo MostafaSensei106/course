@@ -1,15 +1,15 @@
 package com.mostafasensei.course.modules.auth.data.models
 
 import com.mostafasensei.course.modules.auth.domain.entity.User
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.Table
+import com.mostafasensei.course.modules.auth.domain.entity.UserRole
+import jakarta.persistence.*
 import org.springframework.data.annotation.Id
 import java.util.*
+import kotlin.time.Instant
 
 @Entity
 @Table(name = "users")
-class UserJapEntity(
+class UserJpaEntity(
     @Id
     val id: UUID,
 
@@ -44,7 +44,7 @@ class UserJapEntity(
     @Column(nullable = true)
     val deletedAt: Instant? = null
 
-){
+) {
     fun toDomain(): User = User(
         id = id,
         email = email,
@@ -58,6 +58,7 @@ class UserJapEntity(
         updatedAt = updatedAt,
         deletedAt = deletedAt
     )
+
     companion object {
         fun fromDomain(user: User): UserJpaEntity = UserJpaEntity(
             id = user.id,
@@ -72,6 +73,5 @@ class UserJapEntity(
             updatedAt = user.updatedAt,
             deletedAt = user.deletedAt
         )
-    }
     }
 }
