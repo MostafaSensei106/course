@@ -8,6 +8,7 @@ import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.modules.auth.handler.dto.CreatePrivilegedUserRequestDto
 import com.mostafasensei.course.modules.auth.handler.dto.UpdateUserStatusDto
 import com.mostafasensei.course.modules.auth.handler.dto.UserResponseDto
+import com.mostafasensei.course.modules.auth.handler.usecase.DeactivateUserUseCase
 import com.mostafasensei.course.modules.auth.handler.usecase.DeleteUserUseCase
 import com.mostafasensei.course.modules.auth.handler.usecase.GetUserByIdUseCase
 import com.mostafasensei.course.modules.auth.handler.usecase.ListUsersParams
@@ -43,6 +44,7 @@ class AdminUserController(
     private val getUserByIdUseCase: GetUserByIdUseCase,
     private val updateStatusUseCase: UpdateUserStatusUseCase,
     private val deleteUserUseCase: DeleteUserUseCase,
+    private val deactivateUserUseCase: DeactivateUserUseCase,
 ) {
 
     @PostMapping
@@ -102,6 +104,15 @@ class AdminUserController(
         return result.fold(
             onSuccess = { Responser.ok(mapOf("message" to "User deleted")) },
             onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("DELETE_USER_FAILED"), f.message) }
+        )
+    }
+
+    @PostMapping("/{id}/deactivate")
+    suspend fun deactivate(@PathVariable id: UUID): ResponseEntity<ApiResponse<UserResponseDto>> {
+        val result = deactivateUserUseCase(id)
+        return result.fold(
+            onSuccess = { Responser.ok(toDto(it)) },
+            onFailure = { f -> Responser.error(f.toHttpStatus(), f.toCode("DEACTIVATE_USER_FAILED"), f.message) }
         )
     }
 }

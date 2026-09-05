@@ -3,7 +3,6 @@ package com.mostafasensei.course.modules.auth.handler.usecase
 import com.mostafasensei.course.core.error.Failures
 import com.mostafasensei.course.core.utils.result.Result
 import com.mostafasensei.course.core.utils.result.fold
-import com.mostafasensei.course.core.utils.usecase.NoParams
 import com.mostafasensei.course.core.utils.usecase.UseCaseBase
 import com.mostafasensei.course.modules.auth.data.repository.UserRepository
 import com.mostafasensei.course.modules.auth.domain.entity.User
@@ -84,9 +83,4 @@ class GetUserByIdUseCase(
     private val userRepository: UserRepository
 ) : UseCaseBase<User, UUID> {
     override suspend fun invoke(params: UUID): Result<User, Failures> = userRepository.findById(params)
-}
-
-@Service
-class NoopUseCase : UseCaseBase<Unit, NoParams> {
-    override suspend fun invoke(params: NoParams): Result<Unit, Failures> = Result.success(Unit)
 }
