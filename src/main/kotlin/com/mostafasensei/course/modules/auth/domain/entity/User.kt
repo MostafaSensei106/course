@@ -1,7 +1,7 @@
 package com.mostafasensei.course.modules.auth.domain.entity
 
+import java.time.Instant
 import java.util.*
-import kotlin.time.Instant
 
 enum class UserRole {
     GUST,

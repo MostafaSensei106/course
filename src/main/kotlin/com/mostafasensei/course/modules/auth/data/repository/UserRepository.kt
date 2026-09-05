@@ -6,6 +6,7 @@ import java.util.UUID
 
 
 interface UserRepository {
+    suspend fun findById(id: UUID): StorageResult<User>
     suspend fun findByUsername(username: String): StorageResult<User>
     suspend fun findByEmail(email: String): StorageResult<User>
     suspend fun existsByEmail(email: String): StorageResult<Boolean>

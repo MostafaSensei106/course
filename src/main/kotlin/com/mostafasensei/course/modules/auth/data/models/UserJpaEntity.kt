@@ -3,9 +3,8 @@ package com.mostafasensei.course.modules.auth.data.models
 import com.mostafasensei.course.modules.auth.domain.entity.User
 import com.mostafasensei.course.modules.auth.domain.entity.UserRole
 import jakarta.persistence.*
-import org.springframework.data.annotation.Id
+import java.time.Instant
 import java.util.*
-import kotlin.time.Instant
 
 @Entity
 @Table(name = "users")
@@ -45,6 +44,14 @@ class UserJpaEntity(
     val deletedAt: Instant? = null
 
 ) {
+    // JPA requires a no-arg constructor; kotlin-jpa plugin generates one,
+    // protected constructor kept for safety with proxies.
+    protected constructor() : this(
+        UUID.randomUUID(), "", "", "", "",
+        UserRole.STUDENT, false, true,
+        Instant.now(), Instant.now(), null
+    )
+
     fun toDomain(): User = User(
         id = id,
         email = email,

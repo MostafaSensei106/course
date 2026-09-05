@@ -1,4 +1,4 @@
-package com.waffle.core.error
+package com.mostafasensei.course.core.error
 
 import com.mostafasensei.course.core.error.Failures
 import org.hibernate.exception.ConstraintViolationException
@@ -11,7 +11,6 @@ object StorageErrorHandler {
 
 
     fun isStorageError(throwable: Throwable): Boolean {
-        if (throwable is Failures.LocalStorageFailure) return true
         if (throwable is DataAccessException) return true
         if (throwable is PSQLException) return true
         if (throwable is IOException) return true
@@ -29,10 +28,6 @@ object StorageErrorHandler {
         error: Throwable,
         isDebug: Boolean = false,
     ): Failures.LocalStorageFailure {
-        if (error is Failures.LocalStorageFailure) {
-            return error
-        }
-
         val root = unwrapException(error)
         val lowerMessage = root.message?.lowercase().orEmpty()
 

@@ -9,8 +9,8 @@ import com.mostafasensei.course.modules.auth.domain.entity.User
 import com.mostafasensei.course.modules.auth.domain.entity.UserRole
 import com.mostafasensei.course.modules.auth.domain.security.PasswordHasher
 import org.springframework.stereotype.Service
+import java.time.Instant
 import java.util.UUID
-import kotlin.time.Clock
 
 
 data class RegisterUserParams(
@@ -27,21 +27,28 @@ data class RegisterUserParams(
 class RegisterUserUseCase(
     private val repo: UserRepository,
     private val passwordHasher: PasswordHasher,
-    private val clock: Clock,
 ) : UseCaseBase<User, RegisterUserParams> {
 
     override suspend fun invoke(params: RegisterUserParams): Result<User, Failures> {
         val existResult = repo.existsByEmail(params.email)
-        existResult.fold(
-            onSuccess = { it }, onFailure = { failure -> return Result.failure(failure) },
+        val exists = existResult.fold(
+            onSuccess = { it },
+            onFailure = { failure -> return Result.failure(failure) },
+        )
+        if (exists) {
+            return Result.failure(
+                Failures.LocalStorageFailure.DuplicateEntryFailure(
+                    message = "Email already registered",
+                    code = "EMAIL_ALREADY_EXISTS"
+                )
             )
+        }
 
-
-        val now = Clock.System.now()
+        val now = Instant.now()
         val newUser = User(
             id = UUID.randomUUID(),
             email = params.email,
-            passwordHash = requireNotNull(passwordHasher.hash(params.password)),
+            passwordHash = requireNotNull(passwordHasher.hash(params.password)) { "Password hashing failed" },
             firstName = params.firstName,
             lastName = params.lastName,
             role = params.role,
