@@ -1,7 +1,6 @@
 package com.mostafasensei.course.modules.auth.handler.usecase
 
 import com.mostafasensei.course.core.error.Failures
-import com.mostafasensei.course.core.error.Failures.LocalStorageFailure
 import com.mostafasensei.course.core.utils.result.Result
 import com.mostafasensei.course.core.utils.result.fold
 import com.mostafasensei.course.core.utils.usecase.UseCaseBase
@@ -9,7 +8,6 @@ import com.mostafasensei.course.modules.auth.data.repository.UserRepository
 import com.mostafasensei.course.modules.auth.domain.entity.User
 import com.mostafasensei.course.modules.auth.domain.entity.UserRole
 import com.mostafasensei.course.modules.auth.domain.security.PasswordHasher
-import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import java.util.UUID
 import kotlin.time.Clock
@@ -34,21 +32,16 @@ class RegisterUserUseCase(
 
     override suspend fun invoke(params: RegisterUserParams): Result<User, Failures> {
         val existResult = repo.existsByEmail(params.email)
-        existResult.fold(onSuccess = { it }, onFailure = {
-            LocalStorageFailure(
-                code = HttpStatus.CONFLICT.name,
-                message = "User with email ${params.email} already exists",
+        existResult.fold(
+            onSuccess = { it }, onFailure = { failure -> return Result.failure(failure) },
             )
-        }
-        )
-
 
 
         val now = Clock.System.now()
         val newUser = User(
             id = UUID.randomUUID(),
             email = params.email,
-            passwordHash = passwordHasher.hash(params.password),
+            passwordHash = requireNotNull(passwordHasher.hash(params.password)),
             firstName = params.firstName,
             lastName = params.lastName,
             role = params.role,
@@ -58,6 +51,6 @@ class RegisterUserUseCase(
             updatedAt = now,
             deletedAt = null
         )
-        repo.save(newUser)
+        return repo.save(newUser)
     }
 }
